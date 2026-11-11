@@ -24,7 +24,7 @@ build:            ## Build the debug APK
 test:             ## Run the tests that don't need the phone
 	./gradlew testDebugUnitTest
 
-install:          ## Install the APK on the phone (over Wi-Fi)
+install: build    ## Build, then install the APK on the phone (over Wi-Fi)
 	adb install -r $(APK)
 
 run: install      ## Install and start the app

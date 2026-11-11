@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launch screen follows light and dark mode (values-night/splash.xml); the icon itself stays paper. -->
+    <style name="Theme.RadioGolha" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+</resources>

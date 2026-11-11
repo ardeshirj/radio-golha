@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app icon's colours (paper). Made by scripts/make_icon.py. -->
+<resources>
+    <color name="ic_launcher_background">#FFF4ECE0</color>
+    <color name="ic_launcher_rose">#FFEBCB86</color>
+    <color name="ic_launcher_rose_inner">#FFE0B864</color>
+    <color name="ic_launcher_word">#FF1E2B5E</color>
+</resources>

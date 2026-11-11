@@ -46,8 +46,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -59,12 +60,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -187,11 +190,61 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** Vazirmatn (SIL Open Font License, licenses/Vazirmatn-OFL.txt): a Persian typeface made for screens. */
+private val Vazirmatn = FontFamily(
+    Font(R.font.vazirmatn_regular, FontWeight.Normal),
+    Font(R.font.vazirmatn_medium, FontWeight.Medium),
+    Font(R.font.vazirmatn_semibold, FontWeight.SemiBold),
+    Font(R.font.vazirmatn_bold, FontWeight.Bold),
+)
+
+/** Material's type scale, every style set in Vazirmatn. */
+private val VazirmatnTypography = Typography().run {
+    fun TextStyle.v() = copy(fontFamily = Vazirmatn)
+    Typography(
+        displayLarge = displayLarge.v(), displayMedium = displayMedium.v(), displaySmall = displaySmall.v(),
+        headlineLarge = headlineLarge.v(), headlineMedium = headlineMedium.v(), headlineSmall = headlineSmall.v(),
+        titleLarge = titleLarge.v(), titleMedium = titleMedium.v(), titleSmall = titleSmall.v(),
+        bodyLarge = bodyLarge.v(), bodyMedium = bodyMedium.v(), bodySmall = bodySmall.v(),
+        labelLarge = labelLarge.v(), labelMedium = labelMedium.v(), labelSmall = labelSmall.v(),
+    )
+}
+
+// The icon's colours (scripts/make_icon.py): lapis, gold and cream. By day the app is cream paper with lapis ink, like
+// the icon; at night it is deep lapis with gold, like the icon's other palette.
+private val GolhaLight = lightColorScheme(
+    primary = Color(0xFF1E2B5E), onPrimary = Color(0xFFF4ECE0),
+    primaryContainer = Color(0xFFD9DEF2), onPrimaryContainer = Color(0xFF1E2B5E),
+    secondary = Color(0xFF7A5A12), onSecondary = Color.White,
+    secondaryContainer = Color(0xFFEBCB86), onSecondaryContainer = Color(0xFF1E2B5E),
+    tertiary = Color(0xFF7A5A12), onTertiary = Color.White,
+    background = Color(0xFFF4ECE0), onBackground = Color(0xFF1F1B16),
+    surface = Color(0xFFF4ECE0), onSurface = Color(0xFF1F1B16),
+    surfaceVariant = Color(0xFFE6DCCB), onSurfaceVariant = Color(0xFF4E4639),
+    surfaceContainerLowest = Color(0xFFFFFBF5), surfaceContainerLow = Color(0xFFF8F1E6),
+    surfaceContainer = Color(0xFFF0E7D8), surfaceContainerHigh = Color(0xFFEAE0CF),
+    surfaceContainerHighest = Color(0xFFE4D9C6),
+    outline = Color(0xFF7F7667), outlineVariant = Color(0xFFD1C5B4),
+)
+private val GolhaDark = darkColorScheme(
+    primary = Color(0xFFE9B949), onPrimary = Color(0xFF1E2B5E),
+    primaryContainer = Color(0xFF2F4183), onPrimaryContainer = Color(0xFFF4ECE0),
+    secondary = Color(0xFFEBCB86), onSecondary = Color(0xFF1E2B5E),
+    secondaryContainer = Color(0xFF2F4183), onSecondaryContainer = Color(0xFFF4ECE0),
+    tertiary = Color(0xFFEBCB86), onTertiary = Color(0xFF1E2B5E),
+    background = Color(0xFF111733), onBackground = Color(0xFFECE6DA),
+    surface = Color(0xFF111733), onSurface = Color(0xFFECE6DA),
+    surfaceVariant = Color(0xFF2A3360), onSurfaceVariant = Color(0xFFC8C3D8),
+    surfaceContainerLowest = Color(0xFF0B1028), surfaceContainerLow = Color(0xFF161D3D),
+    surfaceContainer = Color(0xFF1A2247), surfaceContainerHigh = Color(0xFF1F2952),
+    surfaceContainerHighest = Color(0xFF26305C),
+    outline = Color(0xFF8E8AA6), outlineVariant = Color(0xFF3B4370),
+)
+
 @Composable
 private fun RadioTheme(content: @Composable () -> Unit) {
-    val context = LocalContext.current
-    val colors = if (isSystemInDarkTheme()) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-    MaterialTheme(colorScheme = colors) {
+    val colors = if (isSystemInDarkTheme()) GolhaDark else GolhaLight
+    MaterialTheme(colorScheme = colors, typography = VazirmatnTypography) {
         // The app is in Persian, so it reads right to left whatever the phone's language is.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl, content = content)
     }

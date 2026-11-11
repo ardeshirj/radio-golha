@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launch screen at night: the icon's lapis, so opening the app doesn't flash cream. -->
+    <color name="splash_background">#FF1E2B5E</color>
+</resources>

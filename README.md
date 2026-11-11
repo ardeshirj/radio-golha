@@ -3,7 +3,7 @@ poetry broadcast by Iranian National Radio from 1956 to 1979, like a radio: pres
 programme after another, in random order and without repeats.
 
 <p align="center">
-  <img src="docs/screenshot-light.png" alt="Radio Golha in light mode: Golha-ye Rangarang 383 on air, Pouran's station" width="280">
+  <img src="docs/screenshot-light.png" alt="Radio Golha in light mode: Golha-ye Rangarang 444 on air, Pouran's station" width="280">
   &nbsp;
   <img src="docs/screenshot-dark.png" alt="The same screen in dark mode" width="280">
 </p>
@@ -67,6 +67,7 @@ make golha-streams   # downloads the site's programme data, checks each MP3 exis
 | `app/src/main/java/com/radiogolha/Station.kt` | Stations, Persian alphabetical order |
 | `app/src/main/java/com/radiogolha/SongLibrary.kt` | Finds the programmes and files to play |
 | `scripts/make_golha_streams.py` | Builds the programme list from golhaprogram.com's data |
+| `scripts/make_icon.py` | Draws the app icon ([docs/ICON.md](docs/ICON.md)) |
 | `scripts/make_test_songs.py` | Generates tagged test songs (`make test-songs`) |
 | [IDEA.md](IDEA.md) | What the app is for, as first written down |
 
