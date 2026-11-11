@@ -5,7 +5,9 @@ poetry broadcast by Iranian National Radio from 1956 to 1979, like a radio: pres
 programme after another, in random order and without repeats.
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="Radio Golha on a Pixel 7: Golha-ye Rangarang 383 on air, Pouran's station" width="320">
+  <img src="docs/screenshot-light.png" alt="Radio Golha in light mode: Golha-ye Rangarang 383 on air, Pouran's station" width="280">
+  &nbsp;
+  <img src="docs/screenshot-dark.png" alt="The same screen in dark mode" width="280">
 </p>
 
 ## What it does
@@ -16,7 +18,8 @@ programme after another, in random order and without repeats.
   دشتی، همایون) or one programme series. Pick with two dropdowns; each choice shows how many programmes it has.
 - **Next and shuffle.** Next plays another random programme of the station; shuffle tunes to a random singer or
   dastgah station.
-- **In Persian, right to left,** with Persian digits and names in Persian alphabetical order.
+- **In Persian, right to left,** with Persian digits and names in Persian alphabetical order. Light and dark mode
+  follow the phone, in its own wallpaper colours.
 - **Plays in the background,** with the usual lock-screen, notification and Bluetooth headphone controls.
 - **A link to each programme's page** on golhaprogram.com, with its poems, players and announcer.
 - **Your own files too (optional).** Audio files in `Music/Golha/` on the phone join the stations through their
