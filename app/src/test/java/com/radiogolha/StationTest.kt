@@ -16,7 +16,7 @@ class StationTest {
         val names = Station.listFor(listOf(marzieh, banan, untagged, banan)).map { it.kind to it.name }
         assertEquals(
             listOf(
-                Station.Kind.ALL to "All songs",
+                Station.Kind.ALL to Station.Kind.ALL.label,
                 Station.Kind.SINGER to "Banan", Station.Kind.SINGER to "Marzieh",
                 Station.Kind.DASTGAH to "Mahur", Station.Kind.DASTGAH to "Shur",
                 Station.Kind.PROGRAM to "Golha-ye Rangarang 1",
@@ -42,6 +42,49 @@ class StationTest {
         assertEquals(Station.ALL, Station.fromKey(Station.ALL.key))
         assertEquals(Station.ALL, Station.fromKey(null))
         assertEquals(Station.ALL, Station.fromKey("nonsense"))
+    }
+
+    @Test
+    fun `a programme with two singers plays on both singers' stations, each listed once`() {
+        val duet = Tags(singers = listOf("Marzieh", "Banan"), dastgahs = listOf("Abu Atta", "Dashti"))
+        assertTrue(Station(Station.Kind.SINGER, "Banan").matches(duet))
+        assertTrue(Station(Station.Kind.SINGER, "Marzieh").matches(duet))
+        assertTrue(Station(Station.Kind.DASTGAH, "Dashti").matches(duet))
+        assertFalse(Station(Station.Kind.SINGER, "Elahe").matches(duet))
+        val singers = Station.listFor(listOf(duet, banan, marzieh)).filter { it.kind == Station.Kind.SINGER }.map { it.name }
+        assertEquals(listOf("Banan", "Marzieh"), singers)
+    }
+
+    @Test
+    fun `stations are in Persian alphabetical order, not character-code order`() {
+        val singers = listOf("گلپایگانی", "تاج", "پوران", "بنان", "چاووشی", "کسایی", "ژاله", "رضا").map { Tags(singer = it) }
+        assertEquals(
+            listOf("بنان", "پوران", "تاج", "چاووشی", "رضا", "ژاله", "کسایی", "گلپایگانی"),
+            Station.listFor(singers).drop(1).map { it.name },
+        )
+        // The zero-width non-joiner in "سه‌گاه" doesn't change its place; the Arabic yeh sorts as the Persian one.
+        assertTrue(PersianOrder.compare("سه\u200Cگاه", "سهگاه") == 0)
+        assertTrue(PersianOrder.compare("شجريان", "شجریان") == 0)
+    }
+
+    @Test
+    fun `shuffle tunes to another singer or dastgah with enough songs`() {
+        val banan = Station(Station.Kind.SINGER, "بنان")
+        val vaziri = Station(Station.Kind.SINGER, "عبدالعلی وزیری")
+        val dashti = Station(Station.Kind.DASTGAH, "دشتی")
+        val program = Station(Station.Kind.PROGRAM, "گل‌های رنگارنگ")
+        val counts = mapOf(Station.ALL to 346, banan to 31, vaziri to 1, dashti to 55, program to 346)
+        val random = Random(8)
+        val picks = (1..200).mapNotNull { Station.shuffle(counts, current = banan, random = random) }.toSet()
+        assertEquals(setOf(dashti), picks)
+        assertEquals(setOf(banan, dashti), (1..200).mapNotNull { Station.shuffle(counts, Station.ALL, random) }.toSet())
+        assertEquals(null, Station.shuffle(mapOf(Station.ALL to 3, vaziri to 1), Station.ALL, random))
+    }
+
+    @Test
+    fun `numbers show in Persian digits`() {
+        assertEquals("۳۴۶", 346.persianDigits())
+        assertEquals("۰", 0.persianDigits())
     }
 
     @Test

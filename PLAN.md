@@ -68,21 +68,41 @@ its 3 songs, each once per round; "Shur" played only its 2 songs (two singers), 
 and reopening, the app was still on Shur and carried on there. Step 3 is done for the test songs. Once real files are
 on hand, check which tags they actually use and adjust the mapping in `SongLibrary.kt`.)
 
-### 3b. Real recordings, streamed (2026-11-10)
-- While the Golha programmes themselves aren't available (see step 5), the app streams 12 openly licensed Persian
-  recordings from Wikimedia Commons: early 78s (Parvaneh, Selim Khan, Nour-Ali Boroumand; public domain) and a few
-  newer CC-licensed ones. The list with tags is `app/src/main/assets/streams.json`; licences and performers are in
-  `CREDITS.md`. Nothing is downloaded or saved; they play only with internet.
-- They mix with the files in `Music/Golha/`, and stations work across both (e.g. "Mahur" plays Parvaneh and the
-  test songs). The player names itself to Wikimedia ("RadioGolha/0.1"), as their rules ask. A song that can't play
-  (no internet) is skipped; after a whole round of failures the radio stops.
-- Also 4 sides from two Columbia 78s recorded in Tehran in 1928 (Iran Sadeghi with Ali Akbar Shahnazi on tar;
-  Mehr Afagh Khanum), from the Internet Archive, CC BY-NC-ND: streamed unmodified, credited, non-commercial. They
-  form the program station "Columbia, Tehran 1928". Internet Archive has little else openly licensed for Persian
-  music; many of its "public domain" labels are set by uploaders and plainly wrong, so each item needs checking.
-- Checked on the Pixel: "Columbia, Tehran 1928" streams and plays. Wikimedia streams got HTTP 429 (rate limit,
-  10 minutes) because my Commons searches from the same home connection used up the allowance; the app skipped
-  and stopped as designed. Still to check once the limit clears: a Wikimedia station (e.g. "Parvaneh").
+### 3b. Open recordings, tried and removed (2026-11-10 to 11)
+- For a day the app also streamed 12 openly licensed recordings from Wikimedia Commons and 4 Columbia 1928 sides
+  from the Internet Archive. Removed on 2026-11-11 once the Golha programmes were in (3c), to keep one source.
+  Wikimedia had also started answering this home connection with HTTP 429. The list and credits are in git history
+  (commit b56dbec).
+
+### 3c. The Golha programmes, from golhaprogram.com (2026-11-11)
+- golhaprogram.com is a community archive (open source on GitHub) that offers each programme as an MP3 to play and
+  download; its robots.txt allows everything but /admin/. Its programme list (front matter of
+  `content/programs/*/*.md`: singers, dastgah) becomes `assets/golhaprogram.json` via
+  `scripts/make_golha_streams.py`, with names in Persian exactly as the site gives them (only the Arabic ي/ك are
+  changed to the Persian ی/ک).
+- 346 Golha-ye Rangarang programmes stream (checked one by one with a header-only request, 0.2 s apart). Left out:
+  8 Rangarang and all 4 Golha-ye Tazeh programmes, listed on the site but missing on its audio server. The other
+  series have no programmes in the site's list yet; rerun the script when they appear.
+- golhaprogram.com is now the only online source; files in `Music/Golha/` on the phone still play alongside.
+- Tags are now lists: most programmes have 2 singers, so a programme plays on each singer's station
+  (`make test`: 11 tests).
+- Checked on the Pixel: the "Banan" station streamed Golha-ye Rangarang 215, then 103 after Next. Still to check:
+  the "Golha-ye Rangarang" program station.
+
+### 3d. Screen redesign, all in Persian (2026-11-11)
+- One screen, right to left, all text in Persian with Persian digits: a card with what's on air (a red "روی آنتن"
+  light, programme, singers, dastgah, and a link to its page on golhaprogram.com), a round play/stop button with
+  next beside it, and two dropdowns ("پخش بر اساس": all / singer / dastgah / program, then which one, each with
+  its number of programmes). Stations are in Persian alphabetical order (`PersianOrder`; plain sorting puts پ چ ژ گ
+  last). Reading files on the phone is optional now, since the programmes stream.
+- The app's name is "رادیو گلها". A station saved by an older version under a Latin name falls back to "all".
+- Checked on the Pixel: the English version of this screen (dropdown with counts,
+  stop/play resuming the same programme) and the Persian one (layout, digits, next mirrored to point left).
+- Buttons: shuffle tunes to a random singer or dastgah station (one with at least 5 programmes, not the current
+  one); next plays a random programme of the current station not yet heard this round. Both point left. Icons are
+  Media3's own (`media3_icon_play/stop/next/shuffle_on`, Material Symbols, Apache 2.0), the same as on the lock
+  screen. `make test`: 14 tests. Checked on the Pixel: shuffle tuned to "مرضیه" and played. Still to check: the
+  Media3 icons on screen.
 
 ## 4. Nice to have
 - Fade between songs (two players or Media3 volume ramp).
@@ -90,7 +110,7 @@ on hand, check which tags they actually use and adjust the mapping in `SongLibra
 - Spoken intro before a song ("Next, Banan in Dastgah-e Mahur"), recorded or text-to-speech.
 
 ## 5. Later, behind decisions
-- Streaming from the Golha archive (golha.co.uk): only after its rights and terms are checked (open question 1).
+- Streaming from the Golha Project's own archive (golha.co.uk): only after its rights and terms are checked (open question 1).
   Checked 2026-11-10: the site's FAQ says "The Golha Project website does not offer a download service", the footer
   says "All rights reserved", and there are no terms allowing reuse. So: no scraping or downloading from the site.
   Legitimate routes: buy the programmes on CD/DVD (7nava.com, SOAS Bookshop) and put our own copies on the phone, or

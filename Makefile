@@ -11,7 +11,7 @@ export ANDROID_HOME := $(HOME)/Library/Android/sdk
 SDK_PACKAGES := "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 APK := app/build/outputs/apk/debug/app-debug.apk
 
-.PHONY: setup build test install run test-songs clean uninstall-tools
+.PHONY: setup build test install run test-songs golha-streams clean uninstall-tools
 
 setup:            ## Install the Mac tools and the Android SDK
 	brew bundle --file=Brewfile
@@ -37,6 +37,23 @@ test-songs:       ## Generate 8 tagged test songs and put them in Music/Golha/ o
 	adb push build/test-songs/*.flac /sdcard/Music/Golha/
 	for f in build/test-songs/*.flac; do adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
 	  -d "\"file:///sdcard/Music/Golha/$$(basename "$$f")\"" > /dev/null; done
+
+GOLHA_SRC := build/golhaprogram-website
+
+golha-streams:    ## Rebuild the programme list from golhaprogram.com (checks each MP3 exists, one at a time)
+	rm -rf $(GOLHA_SRC) && mkdir -p $(GOLHA_SRC)
+	curl -sL https://codeload.github.com/golhaprogram/golhaprogram-website/tar.gz/HEAD \
+	  | tar xz -C $(GOLHA_SRC) --strip-components=1 --exclude ".git*"
+	python3 -I scripts/make_golha_streams.py $(GOLHA_SRC) > build/golha-listed.json
+	python3 -I -c "import json; print('\n'.join(s['url'] for s in json.load(open('build/golha-listed.json'))))" \
+	  | while read -r url; do \
+	      for try in 1 2 3; do \
+	        if [ "$$(curl -s -o /dev/null -I -w '%{http_code}' "$$url")" = 200 ]; then echo "$$url"; break; fi; \
+	        sleep 2; \
+	      done; sleep 0.2; \
+	    done > build/golha-available.txt
+	python3 -I scripts/make_golha_streams.py $(GOLHA_SRC) --available build/golha-available.txt \
+	  > app/src/main/assets/golhaprogram.json
 
 clean:
 	./gradlew clean

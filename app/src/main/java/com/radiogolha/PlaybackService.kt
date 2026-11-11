@@ -52,7 +52,7 @@ class PlaybackService : MediaSessionService() {
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build()
-        // Streams come from Wikimedia, whose rules ask apps to name themselves.
+        // Name the app to the server it streams from (golhaprogram.com), rather than a generic Java client.
         val web = DefaultHttpDataSource.Factory().setUserAgent("RadioGolha/0.1 (personal Android app)")
         player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(DefaultDataSource.Factory(this, web)))

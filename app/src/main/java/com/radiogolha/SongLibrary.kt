@@ -1,8 +1,11 @@
 package com.radiogolha
 
+import android.Manifest
 import android.content.ContentUris
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Bundle
 import android.provider.MediaStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -11,9 +14,12 @@ import org.json.JSONArray
 /**
  * A song on the phone or a stream. For a file, [id] is its folder and file name (e.g. "Music/Golha/Test 01.m4a"):
  * it stays the same when Android re-indexes the files, unlike the media library's own number, so a saved queue
- * still matches. For a stream, [id] is its URL.
+ * still matches. For a stream, [id] is its URL, and [page] is its page on the web, if it has one.
  */
-data class Song(val id: String, val uri: Uri, val title: String, val tags: Tags)
+data class Song(val id: String, val uri: Uri, val title: String, val tags: Tags, val page: String? = null)
+
+/** Where the screen finds a song's web page, in its media item's extras. */
+const val EXTRA_PAGE = "page"
 
 fun Song.toMediaItem(): MediaItem = MediaItem.Builder()
     .setMediaId(id)
@@ -21,34 +27,49 @@ fun Song.toMediaItem(): MediaItem = MediaItem.Builder()
     .setMediaMetadata(
         MediaMetadata.Builder()
             .setTitle(title)
-            .setArtist(tags.singer)
+            .setArtist(tags.singers.joinToString(" و ").ifEmpty { null })
             .setAlbumTitle(tags.program)
-            .setGenre(tags.dastgah)
+            .setGenre(tags.dastgahs.joinToString("، ").ifEmpty { null })
+            .setExtras(Bundle().apply { putString(EXTRA_PAGE, page) })
             .build()
     )
     .build()
 
 /**
  * The radio's songs: files in Music/Golha/ (and its subfolders), found through Android's media library, plus the
- * openly licensed streams listed in assets/streams.json (credits in CREDITS.md).
+ * the Golha programmes streamed from golhaprogram.com, listed in assets/golhaprogram.json (made by
+ * scripts/make_golha_streams.py). Credits in CREDITS.md.
  */
 object SongLibrary {
     const val FOLDER = "Music/Golha/"
 
-    fun load(context: Context): List<Song> = files(context) + streams(context)
+    fun canReadFiles(context: Context) =
+        context.checkSelfPermission(Manifest.permission.READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED
 
-    /** Streams play only with an internet connection; they're never saved to the phone. */
-    private fun streams(context: Context): List<Song> {
-        val list = JSONArray(context.assets.open("streams.json").bufferedReader().use { it.readText() })
+    fun load(context: Context): List<Song> = files(context) + streams(context, "golhaprogram.json")
+
+    /**
+     * Streams play only with an internet connection; they're never saved to the phone. In the list, "singer" and
+     * "dastgah" are one name or a list of names.
+     */
+    private fun streams(context: Context, asset: String): List<Song> {
+        val list = JSONArray(context.assets.open(asset).bufferedReader().use { it.readText() })
         return (0 until list.length()).map { i ->
             val s = list.getJSONObject(i)
             val url = s.getString("url")
-            fun field(name: String) = s.optString(name).takeIf { !s.isNull(name) && it.isNotBlank() }
-            Song(url, Uri.parse(url), s.getString("title"), Tags(field("singer"), field("dastgah"), field("program")))
+            fun names(name: String): List<String> = when (val value = s.opt(name)) {
+                is JSONArray -> (0 until value.length()).map { value.getString(it) }
+                is String -> listOf(value)
+                else -> emptyList()
+            }.map { it.trim() }.filter { it.isNotEmpty() }
+            fun text(name: String) = s.optString(name).takeIf { !s.isNull(name) && it.isNotBlank() }
+            Song(url, Uri.parse(url), s.getString("title"), Tags(names("singer"), names("dastgah"), text("program")), text("page"))
         }
     }
 
+    /** Songs on the phone; none until the app is allowed to read them (streams don't need that). */
     private fun files(context: Context): List<Song> {
+        if (!canReadFiles(context)) return emptyList()
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
