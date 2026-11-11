@@ -32,7 +32,7 @@ CX = CY = 54.0  # the adaptive-icon canvas is 108 x 108; launchers show the midd
 ROLES = ("background", "rose", "rose_inner", "word")  # each becomes @color/ic_launcher_<role>
 PALETTES = {  # in ROLES order
     "paper": ("#FFF4ECE0", "#FFEBCB86", "#FFE0B864", "#FF1E2B5E"),  # the icon: lapis word on cream, pale gold rose
-    "lapis": ("#FF1E2B5E", "#FF2F4183", "#FF3B5099", "#FFE9B949"),  # gold word on deep blue
+    "lapis": ("#FF1E2B5E", "#FF3D54A6", "#FF4D66BD", "#FFE9B949"),  # brighter blue rose on deep blue
 }
 REFS = tuple(f"@color/ic_launcher_{role}" for role in ROLES)
 BG, ROSE, ROSE2, GOLD = REFS

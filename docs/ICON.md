@@ -38,6 +38,12 @@ The script writes these files. Don't edit them by hand, because the next run ove
 
 Then build and install as usual (`make run`).
 
+The README screenshots carry the icon at the bottom: paper on the light one, lapis on the dark one. They're drawn on
+with `rsvg-convert` (`brew install librsvg`): the screenshot with rounded corners and a faint outline, and
+`docs/icon.svg` or `icon-dark.svg` inlined at 176 px, centred on the bottom edge in a ring of the screen's background,
+half below it on a transparent strip, so it reads as a badge rather than part of the screen. If the icon changes, redo them from screenshots without the icon (the
+plain ones are in git before commit "Overlay the icon on the README screenshots").
+
 ## Changing it
 
 All in `scripts/make_icon.py`:

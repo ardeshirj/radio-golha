@@ -2,18 +2,11 @@ A small, personal Android app that plays the **Golha** programmes (گلها), th
 poetry broadcast by Iranian National Radio from 1956 to 1979, like a radio: press play and it keeps going, one
 programme after another, in random order and without repeats.
 
-<table align="center">
-  <tr>
-    <td align="center">
-      <img src="docs/screenshot-light.png" alt="Radio Golha in light mode: Golha-ye Rangarang 444 on air, Pouran's station" width="280"><br><br>
-      <img src="docs/icon.svg" alt="The app icon: a pale gold rose on cream, cut by two rings" width="72">
-    </td>
-    <td align="center">
-      <img src="docs/screenshot-dark.png" alt="The same screen in dark mode" width="280"><br><br>
-      <img src="docs/icon-dark.svg" alt="The icon in lapis: a blue rose on deep blue" width="72">
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/screenshot-light.png" alt="Radio Golha in light mode: Golha-ye Rangarang 444 on air, Pouran's station, with the app icon below" width="280">
+  &nbsp;
+  <img src="docs/screenshot-dark.png" alt="The same screen in dark mode, with the icon in lapis below" width="280">
+</p>
 
 ## What it does
 
