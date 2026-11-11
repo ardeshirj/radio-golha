@@ -18,9 +18,8 @@ player does, and saves nothing.
 The app's text is set in [Vazirmatn](https://github.com/rastikerdar/vazirmatn) by Saber Rastikerdar, SIL Open Font
 License 1.1 (`licenses/Vazirmatn-OFL.txt`); the font files are in `app/src/main/res/font/`.
 
-The word گلها in the app icon is drawn from the letters of [Parastoo](https://github.com/rastikerdar/parastoo-font)
-Bold, also by Saber Rastikerdar under the SIL Open Font License 1.1. The icon holds only the letter shapes, made by
-`scripts/make_icon.py`, not the font. The play, stop, next and shuffle icons are Media3's (Apache 2.0).
+The app icon, a rose with radio-wave rings, is drawn by `scripts/make_icon.py`. The play, stop, next and shuffle icons
+are Media3's (Apache 2.0).
 
 ## Test songs
 

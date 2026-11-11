@@ -1,32 +1,29 @@
 """Draw the Radio Golha app icon as an Android adaptive icon (vector drawables).
 
-The icon: the word گلها in gold, set in Parastoo Bold, over a lapis rose seen from above, with the rose's petal tips
-softly cut by rings in the background colour, like radio waves. Android icons can't use a font, so the word is
-turned into outlines here: HarfBuzz joins the Persian letters, fontTools reads their shapes.
+The icon: a rose seen from above, its petal tips cut by two rings in the background colour, like radio waves. It is
+paper: cream with a pale gold rose. The app's name (رادیو گلها) sits under it in the launcher, so the icon has no word.
 
-    build/icon-venv/bin/python scripts/make_icon.py <Parastoo-Bold.ttf> [--waves wide|subtle|echo]
+    python3 -I scripts/make_icon.py [--scale 1.15] [--waves wide|subtle|echo]
+    build/icon-venv/bin/python -I scripts/make_icon.py --word <Parastoo-Bold.ttf> [...]   (the old icon, with گلها)
 
-The icon is paper: cream, a pale gold rose and the word in lapis. It doesn't change with dark mode on purpose: the
-Pixel launcher draws an icon once and keeps that picture, so a night version would only show if the app happened to be
-installed at night. Themed icons (the monochrome layer) are Android's way to follow the mode. The lapis palette, with a
-gold word, is kept for the README's dark picture and in case we switch.
+--scale enlarges the rose and its rings; the default 1.15 takes the petal tips to 33 from the centre, the edge of the
+area every launcher shape keeps. --word puts the word گلها over the rose, set in Parastoo Bold. Android icons can't use
+a font, so the word is turned into outlines: HarfBuzz joins the Persian letters, fontTools reads their shapes. That needs
+fontTools and uharfbuzz in a venv of their own (`python3 -m venv build/icon-venv && build/icon-venv/bin/pip install
+fonttools uharfbuzz`) and Parastoo Bold from github.com/rastikerdar/parastoo-font (SIL Open Font License 1.1).
 
-Needs fontTools and uharfbuzz, in a venv of their own: `python3 -m venv build/icon-venv &&
-build/icon-venv/bin/pip install fonttools uharfbuzz`. Parastoo Bold comes from github.com/rastikerdar/parastoo-font. Writes, under app/src/main/res/:
-drawable/ic_launcher_foreground.xml, drawable/ic_launcher_monochrome.xml, values/ic_launcher.xml and
-mipmap-anydpi-v26/ic_launcher.xml + ic_launcher_round.xml; and docs/icon.svg + docs/icon-dark.svg (lapis) to look at.
+The icon doesn't change with dark mode on purpose: the Pixel launcher draws an icon once and keeps that picture, so a
+night version would only show if the app happened to be installed at night. Themed icons (the monochrome layer) are
+Android's way to follow the mode. The lapis palette is kept for the README's dark picture and in case we switch.
 
-Parastoo is (c) Saber Rastikerdar, SIL Open Font License 1.1; the icon contains the letter shapes, not the font.
+Writes, under app/src/main/res/: drawable/ic_launcher_foreground.xml, drawable/ic_launcher_monochrome.xml,
+values/ic_launcher.xml and mipmap-anydpi-v26/ic_launcher.xml + ic_launcher_round.xml; and docs/icon.svg +
+docs/icon-dark.svg (lapis) to look at.
 """
 import math
 import os
 import sys
 
-import uharfbuzz as hb
-from fontTools.pens.boundsPen import BoundsPen
-from fontTools.pens.svgPathPen import SVGPathPen
-from fontTools.pens.transformPen import TransformPen
-from fontTools.ttLib import TTFont
 
 RES = "app/src/main/res"
 WORD = "گلها"
@@ -67,6 +64,12 @@ def arc(r, deg, half):
 
 def word_path(font_path, size=28.0, max_width=54.0):
     """The word's outline as path data, its ink centred on the canvas, at `size` units (narrowed to max_width)."""
+    import uharfbuzz as hb  # only needed for --word
+    from fontTools.pens.boundsPen import BoundsPen
+    from fontTools.pens.svgPathPen import SVGPathPen
+    from fontTools.pens.transformPen import TransformPen
+    from fontTools.ttLib import TTFont
+
     blob = hb.Blob.from_file_path(font_path)
     face = hb.Face(blob)
     font = hb.Font(face)
@@ -132,6 +135,40 @@ def vector(paths, comment):
             + "\n".join(paths) + "\n</vector>\n")
 
 
+def layers(font_path=None, waves="wide", scale=1.15):
+    """The foreground and monochrome paths. `scale` enlarges the rose and its waves; a font path adds the word."""
+    word = font_path is not None
+    k = (0.8 if waves == "echo" else 1.0) * scale
+    fg = []
+    for circles, fill, width in rose(k):
+        for x, y, r in circles:
+            fg.append(path(circle(x, y, r), fill=fill, stroke=BG, width=width * k))
+    spiral = f"M{num(CX - 1.5 * k)},{num(CY)} a{num(1.5 * k)},{num(1.5 * k)} 0 1,1 {num(1.5 * k)},{num(1.5 * k)} " \
+             f"a{num(3.2 * k)},{num(3.2 * k)} 0 1,1 {num(-3.2 * k)},{num(-3.2 * k)} a{num(5 * k)},{num(5 * k)} 0 0,1 {num(5 * k)},{num(5 * k)}"
+    fg.append(path(spiral, stroke=BG, width=1.2 * k, cap="round"))
+    if waves == "subtle":  # thin, half-opaque rings near the outer petal tips (the rose reaches 29 from the centre)
+        fg += [path(circle(CX, CY, r * scale), stroke=BG, width=1.2 * scale, alpha=0.6) for r in (23.5, 27)]
+    elif waves == "wide":
+        fg += [path(circle(CX, CY, r * scale), stroke=BG, width=2.2 * scale) for r in (21, 26)]
+    elif waves == "echo":
+        fg += [path(arc(28 * scale, d - 90, 11), stroke=ROSE2, width=2.2 * scale, cap="round") for d in range(0, 360, 45)]
+        fg += [path(arc(32.5 * scale, d - 90, 8), stroke=ROSE2, width=1.8 * scale, alpha=0.55, cap="round")
+               for d in range(0, 360, 45)]
+    else:
+        sys.exit(f"unknown --waves {waves}: use subtle, wide or echo")
+
+    # Themed icon (Android 13+): one colour, tinted by the system.
+    outer, *inner = rose(k)
+    silhouette = lambda rings: " ".join(circle(x, y, r) for circles, _, _ in rings for x, y, r in circles)
+    if word:  # the rose faint, the word solid
+        letters = word_path(font_path, max_width=50 if waves == "echo" else 54)
+        fg.append(path(letters, fill=GOLD))
+        mono = [path(silhouette(rose(k)), fill="#FF000000", alpha=0.3), path(letters, fill="#FF000000")]
+    else:  # the rose alone: outer petals lighter, the heart solid
+        mono = [path(silhouette([outer]), fill="#FF000000", alpha=0.5), path(silhouette(inner), fill="#FF000000")]
+    return fg, mono
+
+
 def main():
     args = sys.argv[1:]
 
@@ -144,32 +181,12 @@ def main():
         return value
 
     waves = option("--waves", "wide")
-    font_path = args[0]
-
-    k = 0.8 if waves == "echo" else 1.0
-    word = word_path(font_path, max_width=50 if waves == "echo" else 54)
-
-    fg = []
-    for circles, fill, width in rose(k):
-        for x, y, r in circles:
-            fg.append(path(circle(x, y, r), fill=fill, stroke=BG, width=width * k))
-    spiral = f"M{num(CX - 1.5 * k)},{num(CY)} a{num(1.5 * k)},{num(1.5 * k)} 0 1,1 {num(1.5 * k)},{num(1.5 * k)} " \
-             f"a{num(3.2 * k)},{num(3.2 * k)} 0 1,1 {num(-3.2 * k)},{num(-3.2 * k)} a{num(5 * k)},{num(5 * k)} 0 0,1 {num(5 * k)},{num(5 * k)}"
-    fg.append(path(spiral, stroke=BG, width=1.2 * k, cap="round"))
-    if waves == "subtle":  # thin, half-opaque rings near the outer petal tips (the rose reaches 29 from the centre)
-        fg += [path(circle(CX, CY, r), stroke=BG, width=1.2, alpha=0.6) for r in (23.5, 27)]
-    elif waves == "wide":
-        fg += [path(circle(CX, CY, r), stroke=BG, width=2.2) for r in (21, 26)]
-    elif waves == "echo":
-        fg += [path(arc(28, d - 90, 11), stroke=ROSE2, width=2.2, cap="round") for d in range(0, 360, 45)]
-        fg += [path(arc(32.5, d - 90, 8), stroke=ROSE2, width=1.8, alpha=0.55, cap="round") for d in range(0, 360, 45)]
-    else:
-        sys.exit(f"unknown --waves {waves}: use subtle, wide or echo")
-    fg.append(path(word, fill=GOLD))
-
-    # Themed icon (Android 13+): one colour, tinted by the system. The rose's silhouette, faint, and the word, solid.
-    silhouette = " ".join(circle(x, y, r) for circles, _, _ in rose(k) for x, y, r in circles)
-    mono = [path(silhouette, fill="#FF000000", alpha=0.3), path(word, fill="#FF000000")]
+    scale = float(option("--scale", "1.15"))
+    font_path = option("--word", None)
+    if args:
+        sys.exit(__doc__)
+    word = font_path is not None
+    fg, mono = layers(font_path, waves, scale)
 
     adaptive = ('<?xml version="1.0" encoding="utf-8"?>\n'
                 "<!-- Made by scripts/make_icon.py. -->\n"
@@ -185,7 +202,7 @@ def main():
                 f"<resources>\n{lines}</resources>\n")
 
     files = {
-        "drawable/ic_launcher_foreground.xml": vector(fg, f"App icon, foreground: the rose ({waves} waves) and the word."),
+        "drawable/ic_launcher_foreground.xml": vector(fg, f"App icon, foreground: the rose ({waves} waves)" + (" and the word." if word else ".")),
         "drawable/ic_launcher_monochrome.xml": vector(mono, "App icon, themed (one colour)."),
         "values/ic_launcher.xml": colours("paper"),
         "mipmap-anydpi-v26/ic_launcher.xml": adaptive,
