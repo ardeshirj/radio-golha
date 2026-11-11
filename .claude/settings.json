@@ -1,0 +1,71 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make build)",
+      "Bash(make test)",
+      "Bash(make install)",
+      "Bash(make run)",
+      "Bash(make test-songs)",
+      "Bash(make golha-streams)",
+      "Bash(make clean)",
+      "Bash(make -n *)",
+      "Bash(./gradlew *)",
+      "Bash(adb devices*)",
+      "Bash(adb install *)",
+      "Bash(adb push * /sdcard/Music/Golha/*)",
+      "Bash(adb exec-out screencap *)",
+      "Bash(adb logcat *)",
+      "Bash(adb mdns *)",
+      "Bash(adb connect *)",
+      "Bash(adb disconnect *)",
+      "Bash(adb shell *)",
+      "Bash(python3 -I scripts/*)"
+    ],
+    "deny": [
+      "Bash(make uninstall-tools*)",
+      "Bash(make setup*)",
+      "Bash(brew *)",
+      "Bash(git push*)",
+      "Bash(adb shell rm *)",
+      "Bash(adb shell pm uninstall *)",
+      "Bash(adb shell pm clear *)",
+      "Bash(adb uninstall *)",
+      "Bash(adb pair *)",
+      "Bash(adb reboot*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "excludedCommands": [
+      "make *",
+      "./gradlew *",
+      "adb *"
+    ],
+    "filesystem": {
+      "allowRead": [
+        "~/.gradle",
+        "~/.android",
+        "~/.kotlin",
+        "~/Library/Android/sdk"
+      ],
+      "allowWrite": [
+        "~/.gradle",
+        "~/.android",
+        "~/.kotlin"
+      ]
+    },
+    "network": {
+      "allowLocalBinding": true,
+      "allowedDomains": [
+        "dl.google.com",
+        "maven.google.com",
+        "repo.maven.apache.org",
+        "repo1.maven.org",
+        "plugins.gradle.org",
+        "services.gradle.org",
+        "downloads.gradle.org"
+      ]
+    }
+  }
+}
