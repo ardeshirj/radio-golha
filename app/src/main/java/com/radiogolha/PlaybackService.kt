@@ -40,6 +40,11 @@ class PlaybackService : MediaSessionService() {
 
         fun savedStation(context: Context): Station =
             Station.fromKey(context.getSharedPreferences(PREFS, MODE_PRIVATE).getString(KEY_STATION, null))
+
+        /** An error from losing the connection, as opposed to a programme that can't play (a missing or broken file). */
+        fun isConnectionError(error: PlaybackException): Boolean =
+            error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
+                error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
     }
 
     private var session: MediaSession? = null
@@ -148,12 +153,22 @@ class PlaybackService : MediaSessionService() {
             .apply()
     }
 
-    /** Songs that failed in a row (e.g. a stream with no internet); reset once something plays. */
+    /** Songs that failed in a row (broken files); reset once something plays. */
     private var failuresInARow = 0
 
     private val radioListener = object : Player.Listener {
-        /** A song that can't play is skipped; after a whole round of failures, stop instead of spinning. */
+        /**
+         * Without internet, the radio pauses on the programme on air, to carry on from there when started again (the
+         * screen's "try again", or play). Skipping would only fail through the whole round, dropping every programme
+         * from it. A programme that can't play (a missing or broken file) is skipped; after a whole round of those,
+         * stop instead of spinning.
+         */
         override fun onPlayerError(error: PlaybackException) {
+            if (isConnectionError(error)) {
+                player.pause()
+                saveState()
+                return
+            }
             failuresInARow++
             if (failuresInARow >= stationSongs().size.coerceAtLeast(1) || !player.hasNextMediaItem()) return
             player.seekToNextMediaItem()

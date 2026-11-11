@@ -40,10 +40,12 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Typography
@@ -80,6 +82,15 @@ import androidx.media3.session.SessionToken
 import androidx.media3.session.R as R3
 import com.google.common.util.concurrent.ListenableFuture
 
+/** The on-air card's status line. */
+enum class OnAir(val label: String) {
+    OFF("خاموش"),
+    ON("روی آنتن"),
+    CONNECTING("در حال اتصال…"),
+    NO_CONNECTION("بدون اتصال"),
+    FAILED("پخش نشد"),
+}
+
 /** What the screen shows about the song on air. */
 data class NowPlaying(val title: String, val singers: String?, val dastgah: String?, val program: String?, val page: String?)
 
@@ -91,6 +102,7 @@ class MainActivity : ComponentActivity() {
     private var canReadFiles by mutableStateOf(false)
     private var songCount by mutableStateOf<Int?>(null)
     private var playing by mutableStateOf(false)
+    private var onAir by mutableStateOf(OnAir.OFF)
     private var nowPlaying by mutableStateOf<NowPlaying?>(null)
     private var stations by mutableStateOf(listOf(Station.ALL))
     private var songsPerStation by mutableStateOf(emptyMap<Station, Int>())
@@ -114,12 +126,14 @@ class MainActivity : ComponentActivity() {
                     canReadFiles = canReadFiles,
                     songCount = songCount,
                     playing = playing,
+                    onAir = onAir,
                     nowPlaying = nowPlaying,
                     stations = stations,
                     songsPerStation = songsPerStation,
                     station = station,
                     onAllowFiles = { askPermission.launch(Manifest.permission.READ_MEDIA_AUDIO) },
                     onPlayStop = { if (playing) controller?.pause() else playRadio() },
+                    onRetry = { playRadio() },
                     onNext = { controller?.seekToNext() },
                     onShuffle = { Station.shuffle(songsPerStation, station)?.let { playRadio(it) } },
                     onStation = { playRadio(it) },
@@ -167,6 +181,13 @@ class MainActivity : ComponentActivity() {
 
     private fun showState(player: Player) {
         playing = player.playWhenReady
+        val error = player.playerError
+        onAir = when {
+            error != null -> if (PlaybackService.isConnectionError(error)) OnAir.NO_CONNECTION else OnAir.FAILED
+            player.isPlaying -> OnAir.ON
+            player.playWhenReady && player.playbackState == Player.STATE_BUFFERING -> OnAir.CONNECTING
+            else -> OnAir.OFF
+        }
         val meta = player.mediaMetadata
         nowPlaying = meta.title?.let {
             NowPlaying(
@@ -255,12 +276,14 @@ private fun RadioScreen(
     canReadFiles: Boolean,
     songCount: Int?,
     playing: Boolean,
+    onAir: OnAir,
     nowPlaying: NowPlaying?,
     stations: List<Station>,
     songsPerStation: Map<Station, Int>,
     station: Station,
     onAllowFiles: () -> Unit,
     onPlayStop: () -> Unit,
+    onRetry: () -> Unit,
     onNext: () -> Unit,
     onShuffle: () -> Unit,
     onStation: (Station) -> Unit,
@@ -276,7 +299,8 @@ private fun RadioScreen(
             Text("برنامه‌های گلها، یکی پس از دیگری", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(28.dp))
 
-            OnAirCard(playing, nowPlaying, station, songCount, onOpenPage)
+            ProblemBanner(onAir, onRetry)
+            OnAirCard(onAir, nowPlaying, station, songCount, onOpenPage)
             Spacer(Modifier.height(28.dp))
 
             Controls(playing, canPlay = songCount != 0, canSkip = nowPlaying != null, onPlayStop, onNext, onShuffle)
@@ -304,21 +328,22 @@ private fun RadioScreen(
     }
 }
 
-/** The song on air: an "On air" light, the title, singers, dastgah and program, and a link to its page. */
+/** The song on air: an "On air" light and status, the title, singers, dastgah and program, and a link to its page. */
 @Composable
-private fun OnAirCard(playing: Boolean, now: NowPlaying?, station: Station, songCount: Int?, onOpenPage: (String) -> Unit) {
+private fun OnAirCard(onAir: OnAir, now: NowPlaying?, station: Station, songCount: Int?, onOpenPage: (String) -> Unit) {
     Card(
         Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Column(Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                OnAirLight(playing)
+                OnAirLight(onAir == OnAir.ON)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    if (playing) "روی آنتن" else "خاموش",
+                    onAir.label,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (onAir == OnAir.NO_CONNECTION || onAir == OnAir.FAILED) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
@@ -357,6 +382,32 @@ private fun OnAirCard(playing: Boolean, now: NowPlaying?, station: Station, song
                     "${songCount?.persianDigits() ?: "…"} برنامه آماده‌ی پخش است.\nبرای شنیدن، دکمه‌ی پخش را بزنید.",
                     style = MaterialTheme.typography.titleMedium,
                 )
+            }
+        }
+    }
+}
+
+/**
+ * A small banner above the card when the radio can't play: no connection (no internet, or the site can't be
+ * reached), or programmes that failed. "Try again" plays the programme on air again, from where it stopped.
+ */
+@Composable
+private fun ProblemBanner(onAir: OnAir, onRetry: () -> Unit) {
+    val message = when (onAir) {
+        OnAir.NO_CONNECTION -> "اتصال برقرار نشد."
+        OnAir.FAILED -> "برنامه‌های این ایستگاه پخش نشدند."
+        else -> return
+    }
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+    ) {
+        Row(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(message, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+            IconButton(onClick = onRetry, modifier = Modifier.semantics { contentDescription = "دوباره" }) {
+                Icon(painterResource(R.drawable.ic_refresh), contentDescription = null)
             }
         }
     }

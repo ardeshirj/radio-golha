@@ -19,7 +19,7 @@ The app's text is set in [Vazirmatn](https://github.com/rastikerdar/vazirmatn) b
 License 1.1 (`licenses/Vazirmatn-OFL.txt`); the font files are in `app/src/main/res/font/`.
 
 The app icon, a rose with radio-wave rings, is drawn by `scripts/make_icon.py`. The play, stop, next and shuffle icons
-are Media3's (Apache 2.0).
+are Media3's, and the refresh icon is from Material Icons (both Google, Apache 2.0).
 
 ## Test songs
 
