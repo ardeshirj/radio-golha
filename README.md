@@ -1,12 +1,12 @@
 # رادیو گلها · Radio Golha
 
-<p align="center">
-  <img src="docs/screenshot.png" alt="Radio Golha on a Pixel 7: Golha-ye Rangarang 383 on air, Pouran's station" width="320">
-</p>
-
 A small, personal Android app that plays the **Golha** programmes (گلها), the legendary series of Persian music and
 poetry broadcast by Iranian National Radio from 1956 to 1979, like a radio: press play and it keeps going, one
 programme after another, in random order and without repeats.
+
+<p align="center">
+  <img src="docs/screenshot.png" alt="Radio Golha on a Pixel 7: Golha-ye Rangarang 383 on air, Pouran's station" width="320">
+</p>
 
 ## What it does
 
