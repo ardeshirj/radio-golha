@@ -1,0 +1,22 @@
+# Build output
+build/
+.gradle/
+.kotlin/
+local.properties
+*.apk
+*.aab
+
+# IDE and local tool settings
+.claude/
+.idea/
+*.iml
+.DS_Store
+
+# Audio is never committed
+*.mp3
+*.m4a
+*.aac
+*.flac
+*.ogg
+*.opus
+*.wav
