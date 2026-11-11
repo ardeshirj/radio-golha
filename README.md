@@ -1,5 +1,3 @@
-# رادیو گلها · Radio Golha
-
 A small, personal Android app that plays the **Golha** programmes (گلها), the legendary series of Persian music and
 poetry broadcast by Iranian National Radio from 1956 to 1979, like a radio: press play and it keeps going, one
 programme after another, in random order and without repeats.
