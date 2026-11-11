@@ -20,3 +20,6 @@ An Android app for the Pixel 7 that plays random songs like a radio. Nothing is 
 
 Next: a short PLAN.md in numbered steps. Step 1 would be one screen with a play button that plays random songs from
 a folder on the Pixel with the screen off.
+
+(2026-11-11: that plan, PLAN.md, was retired once the app was built. It's in the git history (commit c93c538);
+what's still open is under "To do" in the README.)

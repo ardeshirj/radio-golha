@@ -46,7 +46,9 @@ make run        # build, install on the phone and open the app
 ```
 
 The phone connects over Wi-Fi: turn on *Developer options → Wireless debugging*, pair once with
-`adb pair <address>`, after which `adb devices` usually finds it by itself.
+`adb pair <address>`, after which `adb devices` usually finds it by itself. (Building inside Docker was tried and
+dropped: Google's Android build tools are x86-only, so on Apple Silicon they ran emulated, slowly, and ran out of
+memory.)
 
 To refresh the programme list from golhaprogram.com (e.g. when it adds programmes or series):
 
@@ -65,7 +67,16 @@ make golha-streams   # downloads the site's programme data, checks each MP3 exis
 | `app/src/main/java/com/radiogolha/SongLibrary.kt` | Finds the programmes and files to play |
 | `scripts/make_golha_streams.py` | Builds the programme list from golhaprogram.com's data |
 | `scripts/make_test_songs.py` | Generates tagged test songs (`make test-songs`) |
-| [IDEA.md](IDEA.md), [PLAN.md](PLAN.md) | What the app is for, and how it was built step by step |
+| [IDEA.md](IDEA.md) | What the app is for, as first written down |
+
+## To do
+
+- [ ] Check by hand that the lock-screen and Bluetooth headphone buttons pause, resume and skip.
+- [ ] Known gap: if Android kills the app while it's playing, it resumes at the start of that programme, not at
+  the exact second.
+- [ ] Add the Golha Project's archive (golha.co.uk) if they give permission; waiting for their reply.
+- [ ] Ideas: fade between programmes; Android Auto (needs a browsable station list); a spoken intro before each
+  programme ("Next, Banan in Dastgah-e Mahur").
 
 ## Status
 
