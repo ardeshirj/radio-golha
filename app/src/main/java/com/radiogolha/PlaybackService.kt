@@ -1,5 +1,6 @@
 package com.radiogolha
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -61,7 +62,15 @@ class PlaybackService : MediaSessionService() {
             .setWakeMode(C.WAKE_MODE_NETWORK)                         // keep CPU and Wi-Fi awake with the screen off
             .build()
         player.addListener(radioListener)
-        session = MediaSession.Builder(this, player).setCallback(callback).build()
+        // Tapping the media notification (also on the lock screen) opens the app, bringing back its screen if it's
+        // already open, the same way the launcher icon does. Without this, a tap has nowhere to go.
+        val openApp = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java)
+                .setAction(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        session = MediaSession.Builder(this, player).setCallback(callback).setSessionActivity(openApp).build()
     }
 
     private val station: Station get() = savedStation(this)
