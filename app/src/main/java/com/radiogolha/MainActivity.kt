@@ -72,7 +72,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
@@ -300,7 +299,7 @@ private fun RadioScreen(
             Spacer(Modifier.height(28.dp))
 
             ProblemBanner(onAir, onRetry)
-            OnAirCard(onAir, nowPlaying, station, songCount, onOpenPage)
+            OnAirCard(onAir, nowPlaying, songCount, onOpenPage)
             Spacer(Modifier.height(28.dp))
 
             Controls(playing, canPlay = songCount != 0, canSkip = nowPlaying != null, onPlayStop, onNext, onShuffle)
@@ -330,7 +329,7 @@ private fun RadioScreen(
 
 /** The song on air: an "On air" light and status, the title, singers, dastgah and program, and a link to its page. */
 @Composable
-private fun OnAirCard(onAir: OnAir, now: NowPlaying?, station: Station, songCount: Int?, onOpenPage: (String) -> Unit) {
+private fun OnAirCard(onAir: OnAir, now: NowPlaying?, songCount: Int?, onOpenPage: (String) -> Unit) {
     Card(
         Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -344,14 +343,6 @@ private fun OnAirCard(onAir: OnAir, now: NowPlaying?, station: Station, songCoun
                     style = MaterialTheme.typography.labelMedium,
                     color = if (onAir == OnAir.NO_CONNECTION || onAir == OnAir.FAILED) MaterialTheme.colorScheme.error
                             else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.weight(1f))
-                Text(
-                    station.name,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Spacer(Modifier.height(14.dp))
