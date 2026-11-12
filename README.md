@@ -3,7 +3,7 @@ poetry broadcast by Iranian National Radio from 1956 to 1979, like a radio: pres
 programme after another, in random order and without repeats.
 
 <p align="center">
-  <img src="docs/screenshot-light.png" alt="Radio Golha in light mode: Golha-ye Rangarang 444 on air, Pouran's station, with the app icon below" width="280">
+  <img src="docs/screenshot-light.png" alt="Radio Golha in light mode: Golha-ye Rangarang 293 on air, Hossein Ghavami's station, with the app icon below" width="280">
   &nbsp;
   <img src="docs/screenshot-dark.png" alt="The same screen in dark mode, with the icon in lapis below" width="280">
 </p>

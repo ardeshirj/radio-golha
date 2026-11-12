@@ -364,7 +364,9 @@ private fun OnAirCard(onAir: OnAir, now: NowPlaying?, songCount: Int?, onOpenPag
                             contentPadding = PaddingValues(0.dp),
                             modifier = Modifier.padding(top = 4.dp),
                         ) {
-                            Text("شعرها و نوازندگان در golhaprogram.com")
+                            Text("شعرها و نوازندگان")
+                            Spacer(Modifier.width(6.dp))
+                            Icon(painterResource(R.drawable.ic_open_in_new), contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     }
                 }
